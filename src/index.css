@@ -1,15 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
-@layer utilities;
 @import "tailwindcss";
+@layer utilities;
 
-@varient dark (&:where(.dark , .dark*))
+@variant dark (&:where(.dark, .dark *));
 .page-container {
   @apply min-h-screen bg-slate-50 dark:bg-slate-950 pb-24 transition-colors duration-200;
 }
 
 body{
-  @apply dark:bg-slate-950
+  @apply dark:bg-slate-950 dark:text-white
 }
 
 .page-container {
@@ -30,11 +29,11 @@ body{
 
 /* Login Page */
 .login-page-container {
-  @apply flex items-center justify-center w-full h-screen px-4 bg-white dark:bg-slate-950 transition-colors duration-200;
+  @apply flex items-center justify-center w-full h-screen  bg-white dark:bg-slate-950 transition-colors duration-200;
 }
 
 .login-form {
-  @apply flex w-full flex-col max-w-80;
+  @apply flex w-full flex-col max-w-80 gap-2;
 }
 
 .login-input {
@@ -42,7 +41,7 @@ body{
 }
 
 .login-button {
-  @apply mt-6 py-2.5 w-full rounded-md bg-green-600 text-white transition hover:bg-green-700 disabled:opacity-60 text-sm;
+  @apply mt-2 py-2.5 w-full rounded-md bg-green-600 text-white transition hover:bg-green-700 disabled:opacity-60 text-sm;
 }
 
 /* Dashboard Page */

@@ -43,17 +43,16 @@ export const AppProvider = ({children}: {children: React.ReactNode}) =>{
 
     const fetchUser = async(token:string) =>{
         try {
+        
             const {data} = await mockApi.user.me();
             setUser({...data, token});
             if(data?.age && data?.weight && data?.goal){
                 setOnboardingCompleted(true);
             }
-            
+                setIsUserFetched(true);
         } catch (error) {
             console.error("Error fetching user:", error);
                 localStorage.removeItem('token');
-        } finally {
-            setIsUserFetched(true);
         }
     }
 

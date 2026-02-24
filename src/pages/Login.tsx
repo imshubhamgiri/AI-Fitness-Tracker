@@ -1,14 +1,14 @@
-import { AtSignIcon, Eye, EyeClosed, EyeOffIcon, LockIcon, MailIcon } from "lucide-react"
-import { use, useEffect, useState } from "react"
+import { AtSignIcon, Eye, EyeOffIcon, LockIcon, MailIcon } from "lucide-react"
+import { useEffect, useState } from "react"
 import {  useNavigate } from "react-router-dom"
 import { useAppContext } from "../context/AppContext"
 const Login = () => {
-  const [state, setState] = useState('sign')
+  const [state, setState] = useState('signup')
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [setIssubmitting , isSetIssubmitting] = useState(false);
+  const [Issubmitting , SetIssubmitting] = useState(false);
 
   const navigate = useNavigate();
   const {login , signup , user} = useAppContext();
@@ -19,12 +19,23 @@ const Login = () => {
     }
 
   }, [user , navigate])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    SetIssubmitting(true);
+    if(state === 'login') {
+      await login({email, password});
+    } else {
+      await signup({username, email, password});
+    }
+    SetIssubmitting(false);
+  }
   
   return (
     <>
     <main className="login-page-container">
-      <form className="login-form" action="">
-        <h2 className="text-gray-900 text-3xl font-medium dark:text-white">{state === 'login' ? 'Sign In' : 'Sign Up'}</h2>
+      <form className="login-form" action="" onSubmit={handleSubmit}>
+        <h2 className="text-gray-900 text-2xl font-medium dark:text-white">{state === 'login' ? 'Sign In' : 'Sign Up'}</h2>
         <p className="dark:text-gray-400 mt-2 text-sm font-light text-gray-500/90">
           {state === 'login' ? "Please enter Your credentials for Login" : "Please fill the form to create an account"}
         </p>
@@ -80,10 +91,11 @@ const Login = () => {
               </button>
             </div>
           </div>
-        <button className="login-button">{state === 'login' ? 'Login' : 'Sign Up'}</button>
-        <p className="dark:text-gray-400 mt-2 text-sm font-light text-gray-500/90">
+        <button className="login-button" type="submit" disabled={Issubmitting}>
+          {Issubmitting? "Processing..." : state === 'login' ? 'Login' : 'Sign Up'}</button>
+        <p className="dark:text-gray-400 text-center  text-sm font-light text-gray-500/90">
           {state === 'login' ? "Don't have an account? " : "Already have an account? "}
-          <span className="text-blue-600 hover:underline cursor-pointer" onClick={() => setState(state === 'login' ? 'signup' : 'login')}>
+          <span className="text-green-600 hover:scale-110  transition-ease-in hover:underline cursor-pointer" onClick={() => setState(state === 'login' ? 'signup' : 'login')}>
             {state === 'login' ? "Sign Up" : "Login"}
           </span>
         </p>
