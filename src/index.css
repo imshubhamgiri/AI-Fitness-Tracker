@@ -41,7 +41,7 @@ body{
 }
 
 .login-button {
-  @apply mt-2 py-2.5 w-full rounded-md bg-green-600 text-white transition hover:bg-green-700 disabled:opacity-60 text-sm;
+  @apply mt-5 py-2.5 w-full rounded-md bg-green-600 text-white transition hover:bg-green-700 disabled:opacity-60 text-sm;
 }
 
 /* Dashboard Page */

@@ -82,7 +82,7 @@ const Login = () => {
               placeholder="Enter your password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)} />
-              <button onClick={()=>setShowPassword(!showPassword)}>
+              <button type="button" onClick={()=>setShowPassword(!showPassword)}>
               {showPassword ? (
                 <EyeOffIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400  size-4 cursor-pointer" />
               ) : (
