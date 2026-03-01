@@ -1,9 +1,12 @@
-import { PersonStanding, ScaleIcon, Target, User } from "lucide-react"
+import { ArrowLeft, ArrowRight, PersonStanding, ScaleIcon, Target, User } from "lucide-react"
 import { useState } from "react"
-import { Toaster } from "react-hot-toast"
+import toast, { Toaster } from "react-hot-toast"
 import { useAppContext } from "../context/AppContext"
 import Input from "../components/ui/Input"
-import type { ProfileFormData } from "../types"
+import type { ProfileFormData, UserData } from "../types"
+import Button from "../components/ui/Button"
+import mockApi from "../assets/FitTrack_Assets/assets/mockApi"
+import { goalOptions } from "../assets/FitTrack_Assets/assets/assets"
 
 
 const Onboarding = () => {
@@ -22,6 +25,34 @@ const Onboarding = () => {
   const updateFormData = (field: keyof ProfileFormData, value: string | number) => {
     // setFormData((prev) => ({ ...prev, [field]: value }))
     setFormData({...formData, [field]: value })
+  }
+  const handleNext = async() => {
+    if(step ===1){
+      if(!formData.age || Number(formData.age) < 13 || Number(formData.age) > 100){
+        if(!formData.age){
+          toast("Age is required")
+          return
+        }else{
+          toast("Please enter a valid age between 13 and 100")
+          return
+        }
+      }
+    }
+    if (step < totalSteps) {
+      setStep(step + 1)
+    } else {
+      const userdata ={
+        ...formData,
+        age: Number(formData.age),
+        weight: Number(formData.weight),
+        height: formData.height ? Number(formData.height) : null,
+        createdAt: new Date(),
+      }
+      localStorage.setItem("fitnessUser", JSON.stringify(userdata))
+      await mockApi.user.update(user?.id || "", userdata  as unknown as Partial<UserData>)
+      setOnboardingCompleted(true)
+      fetchUser(user?.token|| "")
+    }
   }
   return (
     <>
@@ -116,27 +147,41 @@ const Onboarding = () => {
                     <p className="text-slate-500 dark:text-slate-400 text-sm">We will Tailor your experience to your goals</p>
                   </div>
                 </div>
-                <Input  label="Age"
-                type="number"
-                className="max-w-2xl"
-                value={formData.age}
-                onChange={(value) => updateFormData("age", value)}
-                placeholder="Enter your age"
-                min={13} max={100} required/>
+                  {/* options */}
+                  <div className="space-y-4  max-w-lg">
+                  {goalOptions.map((option) => (
+                    <div key={option.value} className={`p-4 rounded-lg border cursor-pointer
+                    ${formData.goal === option.value ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10" : "border-slate-300 dark:border-slate-800"}`}
+                    onClick={() => updateFormData("goal", option.value)}
+                    >
+                      <h3 className="font-medium text-slate-800 dark:text-white">{option.label}</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{option.description}</p>
+                    </div>
+                    ))}
+                  </div>
               </div>
             )}
           </div>
           
           {/* Buttons at bottom right */}
-          <div className="flex gap-3 justify-end mt-6">
+          <div className="pb-10 p-7 onboarding-wrapper ">
+            <div className="flex gap-3 lg:justify-end">
+
             {step > 1 && (
-              <button className="btn btn-slate-500" onClick={() => setStep((p) => p > 1 ? p - 1 : p)}>
-                Back
-              </button>
+              <Button variant="secondary" className="max-lg:flex-1 lg:px-10" onClick={() => setStep((p) => p > 1 ? p - 1 : p)}>
+                <span className="flex items-center justify-center gap-2">
+                  <ArrowLeft className="w-5 h-5" />
+                  Back
+                </span>
+              </Button>
             )}
-            <button className="btn btn-emerald" onClick={() => setStep((p) => p < totalSteps ? p + 1 : p)}>
-              {step === totalSteps ? 'Finish' : 'Next'}
-            </button>
+            <Button onClick={handleNext} className="max-lg:flex-1 lg:px-10">
+              {step === totalSteps ? 'Get Started' :
+               <span className="flex items-center justify-center gap-2">
+                  Next <ArrowRight className="w-5 h-5" />
+                </span>}
+            </Button>
+                </div>
           </div>
        </div>
       </div>
