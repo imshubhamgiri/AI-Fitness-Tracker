@@ -6,7 +6,8 @@ import Input from "../components/ui/Input"
 import type { ProfileFormData, UserData } from "../types"
 import Button from "../components/ui/Button"
 import mockApi from "../assets/FitTrack_Assets/assets/mockApi"
-import { goalOptions } from "../assets/FitTrack_Assets/assets/assets"
+import { ageRanges, goalOptions } from "../assets/FitTrack_Assets/assets/assets"
+import Slider from "../components/ui/Slider"
 
 
 const Onboarding = () => {
@@ -150,15 +151,52 @@ const Onboarding = () => {
                   {/* options */}
                   <div className="space-y-4  max-w-lg">
                   {goalOptions.map((option) => (
-                    <div key={option.value} className={`p-4 rounded-lg border cursor-pointer
+                    <button key={option.value} className={`onboarding-option border rounded-lg p-4 w-full text-left
                     ${formData.goal === option.value ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10" : "border-slate-300 dark:border-slate-800"}`}
-                    onClick={() => updateFormData("goal", option.value)}
+                    onClick={() =>{
+                       const age = Number(formData.age)
+                       const range = ageRanges.find((r)=> age <= r.max) || ageRanges[ageRanges.length - 1]
+                       let intake = range.maintain
+                       let burn = range.burn
+                       if(option.value === "lose"){
+                        intake -= 400
+                        burn += 100
+                       }else if(option.value === "gain"){
+                        intake += 400
+                        burn -= 100
+                       }
+                      setFormData({
+                        ...formData,
+                        goal: option.value as 'lose' | 'maintain' | 'gain',
+                        dailyCalorieIntake: intake,
+                        dailyCalorieBurn: burn,
+                      })}}
                     >
                       <h3 className="font-medium text-slate-800 dark:text-white">{option.label}</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{option.description}</p>
-                    </div>
+
+                    </button>
                     ))}
                   </div>
+                  <div className="border-t border-slate-200 dark:border-slate-700 my-6
+                  max-w-lg"> </div>
+                      {/*Targets  */}
+                      <div className="space-y-8 max-w-lg">
+                        <h3 className="text-md font-medium text-slate-700 dark:text-white
+                        mb-4">
+                          Daily Targets
+                        </h3>
+                        <div className="space-y-6">
+                        <Slider label="Daily Calorie intake" min={120} max={4000} step={50}
+                        value={formData.dailyCalorieIntake} onChange={(e)=>updateFormData(
+                          'dailyCalorieIntake',e
+                        )} unit="kcal" infoText="The total calories you plan to consume everyday"/>
+                        
+                              <Slider label="Daily Calorie burn" min={120} max={4000} step={50}
+                              value={formData.dailyCalorieBurn} onChange={(e)=>updateFormData(
+                                'dailyCalorieBurn',e
+                              )} unit="kcal" infoText="The total calories you plan to burn everyday"/>
+                        </div>
+                      </div>
               </div>
             )}
           </div>
