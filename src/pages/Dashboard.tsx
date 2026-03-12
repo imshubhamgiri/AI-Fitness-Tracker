@@ -4,7 +4,8 @@ import { useState , useEffect} from "react";
 import type { ActivityEntry, FoodEntry } from "../types";
 import Card from "../components/ui/Card";
 import ProgressBar from "../components/ui/ProgressBar";
-import { ActivityIcon, FlameIcon, Hamburger, ZapIcon } from "lucide-react";
+import { ActivityIcon, Car, FlameIcon, Hamburger, RulerIcon, ScaleIcon, TrendingUp, ZapIcon } from "lucide-react";
+import CaloriesChart from "../assets/FitTrack_Assets/assets/CaloriesChart";
 
 
 const Dashboard = () => {
@@ -27,7 +28,6 @@ const Dashboard = () => {
    const totalCalories : number = todayFood.reduce((sum, entry) => sum + entry.calories, 0);
    const TotalActiveminutes : number = todayActivity.reduce((sum, entry) => sum + entry.duration, 0);
     const caloriesBurned : number = todayActivity.reduce((sum, entry) => sum + (entry.calories || 0), 0);
-   const netCalories : number = totalCalories - caloriesBurned;
    const remainingCalories : number = DAILY_CALORIE_LIMIT - totalCalories;
   const motivation = getMotivationalMessage(totalCalories, TotalActiveminutes,DAILY_CALORIE_LIMIT);
   return (
@@ -97,7 +97,7 @@ const Dashboard = () => {
       </div>
       <ProgressBar value={caloriesBurned} max={user?.dailyCalorieBurn || 400}  />
     </Card>
-    {/* Calories Burned */}
+    {/* Stats */}
     <div className= "dashboard-card-grid">
             {/* {active mins} */}
       <Card className="shadow-lg">
@@ -122,9 +122,158 @@ const Dashboard = () => {
         </Card>
     </div>
 
-  
-  
-    </div>
+   {/* {goal card} */}
+      {user && (
+        <Card className="bg-linear-to-r from-slate-800 to-slate-700  ">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+              <TrendingUp className="w-6  h-6  text-emerald-400"/>
+            </div>
+            <div className="">
+              <p className="text-sm  text-slate-400">Your Goal</p>
+              <p className="font-semibold capitalize text-white">
+                {user.goal === 'lose' && '🔥 Lose Weight'}
+                {user.goal === 'maintain' && '✅ Maintain Weight'}
+                {user.goal === 'gain' && '💪 Gain Muscle'}
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+      {/* {Body metrics card} */}
+      {user && user.weight &&(
+        <Card>
+          <div className="flex items-center gap-4 mb-6">
+       <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <ScaleIcon className="w-6  h-6  text-indigo-500"/>
+            </div>
+            <div>
+              <h3 className="font-semibold  text-slate-800 dark:text-white"> Body Metrics</h3>
+              <p className="text-sm  text-slate-400">Your Stats</p>
+            </div>
+
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
+                  <ScaleIcon className="w-5 h-5 text-slate-500" />
+                </div>
+                <span className="text-sm text-slate-500 dark:text-slate-400">Weight</span>
+              </div>
+             <span className="font-semibold text-slate-700 dark:text-white">{user.weight} kg</span>
+            </div>
+            {user.height && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
+                    <RulerIcon className="w-5 h-5 text-slate-500" />
+                  </div>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">Height</span>
+                </div>
+                <span className="font-semibold text-slate-700 dark:text-white">{user.height} cm</span>
+              </div>
+            )}
+            {user.height && (
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                 <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-400">
+                      BMI
+                      </span>
+
+                      {(()=>{
+                        const bmi = (user.weight / Math.pow(user.height / 100, 2)).toFixed(1);
+                        const bmiStatus = (b:number)=>{
+                          if (b < 18.5) return {color:'text-blue-500', bg:'bg-blue-100'};
+                          if (b < 25) return {
+                            color:'text-emerald-500',
+                             bg:'bg-emerald-500'
+                          };
+                          if (b < 30) return {
+                            color:'text-orange-500',
+                             bg:'bg-orange-500'
+                          };
+                          return {
+                            color:'text-red-500',
+                            bg: 'bg-red-500'
+                          };
+                        };
+                        const status = bmiStatus(parseFloat(bmi));
+                        return (
+                          <span className={`text-lg font-bold ${status.color} `}>
+                            {bmi}
+                          </span>
+                        )
+                      })()}
+                 </div>
+                 {/* BMi scale visual */}
+                 <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden
+                 flex ">
+                   {/* <div
+                     className={`h-full rounded-full ${
+                       parseFloat(bmi) < 18.5
+                         ? 'bg-blue-500'
+                         : parseFloat(bmi) < 25
+                         ? 'bg-emerald-500'
+                         : parseFloat(bmi) < 30
+                         ? 'bg-orange-500'
+                         : 'bg-red-500'
+                     }`}
+                     style={{ width: `${Math.min(100, (parseFloat() / 40) * 100)}%` }}
+                   ></div> */}
+                   <div className="flex-1 bg-blue-400 opacity-30"></div>
+                   <div className="flex-1 bg-emerald-400 opacity-30"></div>
+                   <div className="flex-1 bg-orange-400 opacity-30"></div>
+                   <div className="flex-1 bg-red-400 opacity-30"></div>
+              
+                 </div>
+                 <div className="flex justify-between mt-1 text-[-10px] text-slate-400">
+                    <span>18.5</span>
+                    <span>25</span>
+                    <span>30</span>
+                 </div>
+              </div>
+            )}
+          </div>
+          </Card>
+      )}
+      {/* Quick summary */}
+      <Card>
+        <h3 className="font-semibold  text-slate-700 dark:text-white mb-4">
+        Today's Summary
+        </h3>
+
+        <div className="space-y-3">
+          <div className="flex items-center py-2 border-b border-slate-100 dark:border-slate-800 justify-between">
+            <span className="text-slate-500 dark:text-slate-400" >Meals Logged</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">{todayFood.length} </span>
+            </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center py-2 border-b border-slate-100 dark:border-slate-800 justify-between">
+            <span className="text-slate-500 dark:text-slate-400" >Total Calories</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">{totalCalories} Kcal  </span>
+            </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center py-2   justify-between">
+            <span className="text-slate-500 dark:text-slate-400" >Active Minutes</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">{TotalActiveminutes} </span>
+            </div>
+        </div>
+        
+        </Card>
+
+        {/* Activity Chart */}
+        <Card className="col-span-2 shadow-lg">
+          <h3 className="font-semibold  text-slate-700 dark:text-white mb-2">
+            This Week's Progess
+          </h3>
+          <CaloriesChart/>
+          </Card>
+     </div>
     </div>
   )
 }
