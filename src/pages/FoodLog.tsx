@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAppContext } from "../context/AppContext"
 import type { FoodEntry, FormData } from "../types";
 import Card from "../components/ui/Card";
-import { quickActivitiesFoodLog } from "../assets/FitTrack_Assets/assets/assets";
+import { mealColors, mealIcons, mealTypeOptions, quickActivitiesFoodLog } from "../assets/FitTrack_Assets/assets/assets";
+import Button from "../components/ui/Button";
+import { Loader2Icon, PlusIcon, SparkleIcon, Trash2Icon, UtensilsCrossedIcon } from "lucide-react";
+import Input from "../components/ui/Input";
+import Select from "../components/ui/Select";
+import mockApi from "../assets/FitTrack_Assets/assets/mockApi";
 
 
 const FoodLog = () => {
@@ -11,6 +16,7 @@ const FoodLog = () => {
   const [showForm , setShowForm] = useState(false);
   const[loading , setLoading] = useState(false);
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const [formData , setFormData] = useState<FormData>({
     name: "",
     calories: 0,
@@ -20,6 +26,32 @@ const FoodLog = () => {
   const handleQuickAdd = (activityname : string)=>{
  setFormData({...formData , mealType: activityname})
  setShowForm(true);
+  }
+
+  const handleDelete = async(documentId : string)=>{
+    try {
+      await mockApi.foodLogs.delete(documentId);
+      setAllFoodLogs(prev => prev.filter(log => log.documentId !== documentId));
+    } catch (error : any) {
+      console.error("Failed to delete food entry:", error);
+    }
+  }
+
+  const groupedEntries :Record<'breakfast' | 'lunch' | 'dinner' | 'snack' , FoodEntry[]> = entries.reduce((groups , entry)=>{
+  const MealType = entry.mealType;
+  if(!groups[MealType]){
+    groups[MealType] = [];
+  }
+  groups[MealType].push(entry);
+  return groups;
+  } , {} as Record<'breakfast' | 'lunch' | 'dinner' | 'snack' , FoodEntry[]>);
+
+  const handleSubmit =  async( e :  React.SubmitEvent<HTMLFormElement> ) =>{
+ e.preventDefault();
+ const {data} = await mockApi.foodLogs.create({data: formData});
+  setAllFoodLogs(prev => [...prev , data]);
+  setFormData({name: "", calories: 0, mealType: ""});
+  setShowForm(false);
   }
 
   const Today = new Date().toISOString().split('T')[0];
@@ -67,8 +99,119 @@ const FoodLog = () => {
               ))}
             </div>
           </Card>
+            
+          <Button className="w-full" onClick={()=>setShowForm(true)}>
+                <PlusIcon className="size-5"/>
+                Add Food Entry
+          </Button>
+          
+          <Button className="w-full" onClick={()=>inputRef.current?.click()}>
+                <SparkleIcon className="size-5"/>
+                AI Food Snap
+          </Button>
+
+          <input type="file" accept="image/*"  hidden  ref= {inputRef}/>
+          {loading && 
+          <div className="fixed inset-0 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur
+         flex items-center justify-center z-100 ">
+           <Loader2Icon className="size-8 text-emerald-600 dark:text-emerald-400 
+           animate-spin"/>
+          </div>
+          }
         </div>
        )}
+
+  {/* Form for adding new food entries */}
+   {showForm && (
+    <Card className="border-2  border-emerald-200 dark:border-emerald-700">
+      <h3 className="font-semibold text-slate-800 dark:text-white mb-4">
+        New Food Entry
+      </h3>
+      <form className="space-y-4" onSubmit={handleSubmit} >
+      <Input label="Food Name"  value={formData.name} onChange={(e)=>setFormData({...formData , name: e.toString()})}
+      placeholder="Enter food name" required />
+      <Input label="Calories" type="number" value={formData.calories} onChange={(e)=>setFormData({...formData , calories: Number(e)})} placeholder="e.g., 250" required/>
+      <Select label="Meal Type" value={formData.mealType} onChange={(e)=>setFormData({...formData , mealType: e.toString()})}
+        options={mealTypeOptions} placeholder="Select Meal Type" required/>
+     
+      <div className="flex gap-2 pt-2">
+        <Button onClick={()=>(setShowForm(false), setFormData({name: "", calories: 0, mealType: ""}))} type="button"
+          className="flex-1 " variant="secondary">
+          Cancel
+        </Button>
+
+        <Button type="submit" className="flex-1">
+          Add Entry
+        </Button>
+      </div>
+      </form>
+      </Card>
+   )}
+
+   {entries.length > 0 ? (
+     <div className="space-y-4">
+      {["breakfast", "lunch", "dinner", "snack"].map((mealType) => {
+        const mealTypekey = mealType as keyof typeof groupedEntries;
+        if (!groupedEntries[mealTypekey]) return null;
+        const MealIcon = mealIcons[mealTypekey];
+        const mealCalories = groupedEntries[mealTypekey].reduce((total, entry) => total + entry.calories, 0);
+        
+        return(
+          <Card key={mealType} className="border-2 border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between mb-4">
+             <div className="flex items-center gap-3">
+              <div className={`size-10 rounded-xl bg-slate-100 flex items-center justify-center
+                ${mealColors[mealTypekey]} `}>
+                <MealIcon className="size-5 text-slate-500 dark:text-slate-400"/>
+              </div>
+              <div>
+                <h3 className = "font-semibold">{mealType}</h3>
+                <p>{groupedEntries[mealTypekey].length} Items</p>
+              </div>
+             </div>
+             <p className="font-bold text-slate-700 dark:text-slate-200">
+               {mealCalories} Calories
+             </p>
+            </div>
+
+            <div className="space-y-3">
+              {groupedEntries[mealTypekey].map((entry)=>(
+                <div key={entry.id} className="food-entry-item">
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-700 dark:text-slate-300">{entry.name}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                      {entry.calories} Kcal
+                    </span>
+                    <button  onClick={()=>handleDelete(entry?.documentId || ' ')}
+                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50
+                    dark:hover:bg-red-900/20 rounded-xl transition-colors">
+                      <Trash2Icon className="w-4 h-4"/>
+                    </button>
+                  </div>
+                </div>
+      ))}
+            </div>
+          </Card>
+        )
+
+      })}
+     </div>
+   ):(
+      <Card className="text-center py-12">
+        <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex 
+        items-center justify-center mx-auto mb-4">
+          <UtensilsCrossedIcon className ="size-8 text-slate-400 dark:text-slate-500"/>
+        </div>
+        <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-2">
+          No Food Logged Today
+        </h3>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
+          Start tracking your food intake to see it here!
+        </p>
+      </Card>
+   )}
       </div>
     </div>
   )
