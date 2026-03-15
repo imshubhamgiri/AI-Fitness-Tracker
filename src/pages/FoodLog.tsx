@@ -8,6 +8,7 @@ import { Loader2Icon, PlusIcon, SparkleIcon, Trash2Icon, UtensilsCrossedIcon } f
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import mockApi from "../assets/FitTrack_Assets/assets/mockApi";
+import toast from "react-hot-toast";
 
 
 const FoodLog = () => {
@@ -28,12 +29,22 @@ const FoodLog = () => {
  setShowForm(true);
   }
 
+  const handleImgaeChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
+        const file = e.target.files?.[0];
+
+        // Implementation
+  }
+
   const handleDelete = async(documentId : string)=>{
     try {
-      await mockApi.foodLogs.delete(documentId);
-      setAllFoodLogs(prev => prev.filter(log => log.documentId !== documentId));
+      const confirm = window.confirm('Are You Really want to delete This Entry')
+      if(confirm){
+        await mockApi.foodLogs.delete(documentId);
+        setAllFoodLogs(prev => prev.filter(log => log.documentId !== documentId));
+      }
     } catch (error : any) {
       console.error("Failed to delete food entry:", error);
+      toast( error?.message ||'failed To Delete food');
     }
   }
 
@@ -110,7 +121,7 @@ const FoodLog = () => {
                 AI Food Snap
           </Button>
 
-          <input type="file" accept="image/*"  hidden  ref= {inputRef}/>
+          <input onChange={handleImgaeChange} type="file" accept="image/*"  hidden  ref= {inputRef}/>
           {loading && 
           <div className="fixed inset-0 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur
          flex items-center justify-center z-100 ">
@@ -160,9 +171,9 @@ const FoodLog = () => {
           <Card key={mealType} className="border-2 border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
              <div className="flex items-center gap-3">
-              <div className={`size-10 rounded-xl bg-slate-100 flex items-center justify-center
+              <div className={`size-10 rounded-xl flex items-center justify-center
                 ${mealColors[mealTypekey]} `}>
-                <MealIcon className="size-5 text-slate-500 dark:text-slate-400"/>
+                <MealIcon className="size-5 text-orange-500 dark:text-orange-400"/>
               </div>
               <div>
                 <h3 className = "font-semibold">{mealType}</h3>
