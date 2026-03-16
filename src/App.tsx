@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom"
+import { Toaster } from "react-hot-toast"
 import Layout from "./pages/Layout"
 import Dashboard from "./pages/Dashboard"
 import FoodLog from "./pages/FoodLog"
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <>
+    <Toaster />
     <Routes>
       <Route path="/" element = {<Layout/>}>
         <Route index element={<Dashboard/>}/>

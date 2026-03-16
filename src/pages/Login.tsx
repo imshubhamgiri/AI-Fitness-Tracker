@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import {  useNavigate } from "react-router-dom"
 import { useAppContext } from "../context/AppContext"
 const Login = () => {
-  const [state, setState] = useState('signup')
+  const [state, setState] = useState('login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +20,7 @@ const Login = () => {
 
   }, [user , navigate])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     SetIssubmitting(true);
     if(state === 'login') {
